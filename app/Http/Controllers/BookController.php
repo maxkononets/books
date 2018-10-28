@@ -70,11 +70,11 @@ class BookController extends Controller
             $batch->add($this->googleBooks->volumes->get($id));
         });
         $response = collect($batch->execute())->values();
-        $response = $response->map(function ($values){
+        $response = $response->map(function ($values) {
             return [
                 'id' => $values->id,
                 'volumeInfo' => $values->volumeInfo,
-                ];
+            ];
         });
         return $response;
     }
@@ -88,7 +88,7 @@ class BookController extends Controller
         $client = new Client();
         $response = $client->get('https://www.googleapis.com/books/v1/volumes?q=' . $phrase);
         $bookVolumes = collect(json_decode($response->getBody()->getContents())->items);
-        $bookVolumes = $bookVolumes->map(function ($values){
+        $bookVolumes = $bookVolumes->map(function ($values) {
             return [
                 'id' => $values->id,
                 'volumeInfo' => $values->volumeInfo,
