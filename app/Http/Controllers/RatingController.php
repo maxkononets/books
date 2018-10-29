@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Book;
-use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,7 +20,7 @@ class RatingController extends Controller
             return response('rating added', 200);
         }
         return response()->json([
-            'error' => 'something went wrong',
+            'error' => 'Something went wrong',
         ], 200);
     }
 

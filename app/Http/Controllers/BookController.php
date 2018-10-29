@@ -34,16 +34,22 @@ class BookController extends Controller
     public function getStarted()
     {
         $user = Auth::user();
-        $libraryBooksID = $user->libraryBooks->pluck('book_id');
-        $readingBooksID = $user->readingBooks->pluck('book_id');
-        $wishesID = $user->wishes->pluck('book_id');
+        $libraryBooksID = $user->libraryBooks->pluck('book_id') ?? [];
+        $readingBooksID = $user->readingBooks->pluck('book_id') ?? [];
+        $wishesID = $user->wishes->pluck('book_id') ?? [];
 
         $libraryBooks = $this->getManyBooksById($libraryBooksID);
         $readingBooks = $this->getManyBooksById($readingBooksID);
         $wishes = $this->getManyBooksById($wishesID);
+
+        if ($libraryBooks->isNotEmpty()) {
+            $randomAuthor = collect($libraryBooks->random()['volumeInfo']['authors'])->random();
+            $randomCategory = collect($libraryBooks->random()['volumeInfo']['categories'])->random();
+        }
+
         $specialForYou = [
-            'by_author' => $this->getSpecialForYou(collect($libraryBooks->random()['volumeInfo']['authors'])->random()),
-            'by_category' => $this->getSpecialForYou(collect($libraryBooks->random()['volumeInfo']['categories'])->random()),
+            'by_author' => $this->getSpecialForYou($randomAuthor ?? []),
+            'by_category' => $this->getSpecialForYou($randomCategory ?? []),
         ];
 
         $userInfo = [
@@ -63,6 +69,10 @@ class BookController extends Controller
      */
     public function getManyBooksById(iterable $ids)
     {
+        if(!$ids){
+            return collect([]);
+        }
+
         $this->google->setUseBatch(true);
         $batch = new Google_Http_Batch($this->google);
 
@@ -85,6 +95,11 @@ class BookController extends Controller
      */
     public function getSpecialForYou($phrase)
     {
+
+        if(!$phrase){
+            return collect([]);
+        }
+
         $client = new Client();
         $response = $client->get('https://www.googleapis.com/books/v1/volumes?q=' . $phrase);
         $bookVolumes = collect(json_decode($response->getBody()->getContents())->items);
