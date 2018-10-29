@@ -24,6 +24,12 @@ Route::post('/registration/userInfo', function (){
 
 Auth::routes();
 
+Route::get('/token', function (){
+    return response()->json([
+        '_token' => csrf_token(),
+    ], 200);
+});
+
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/after/login', 'BookController@getStarted');
