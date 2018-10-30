@@ -45,11 +45,14 @@ class BookController extends Controller
         if ($libraryBooks->isNotEmpty()) {
             $randomAuthor = collect($libraryBooks->random()['volumeInfo']['authors'])->random();
             $randomCategory = collect($libraryBooks->random()['volumeInfo']['categories'])->random();
+        }else{
+            $randomAuthor = 'bestseller';
+            $randomCategory = $this->getGenre();
         }
 
         $specialForYou = [
-            'by_author' => $this->getSpecialForYou($randomAuthor ?? []),
-            'by_category' => $this->getSpecialForYou($randomCategory ?? []),
+            'by_author' => $this->getSpecialForYou($randomAuthor),
+            'by_genre' => $this->getSpecialForYou($randomCategory),
         ];
 
         $userInfo = [
@@ -69,10 +72,6 @@ class BookController extends Controller
      */
     public function getManyBooksById(iterable $ids)
     {
-        if(!$ids){
-            return collect([]);
-        }
-
         $this->google->setUseBatch(true);
         $batch = new Google_Http_Batch($this->google);
 
@@ -110,5 +109,11 @@ class BookController extends Controller
             ];
         });
         return $bookVolumes;
+    }
+
+    public function getGenre()
+    {
+        $genres = collect(explode(', ','Science fiction, Satire, Drama, Action and Adventure, Romance, Mystery, Horror, Self help, Health, Guide, Travel, Children\'s, Religion, Spirituality & New Age, Science, History, Math, Anthology, Poetry, Encyclopedias, Dictionaries, Comics, Art, Cookbooks, Diaries, Journals, Prayer books, Series, Trilogy, Biographies, Autobiographies, Fantasy'));
+        return $genres->random();
     }
 }
